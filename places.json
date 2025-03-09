@@ -1,0 +1,43 @@
+[
+    {
+      "id": 1,
+      "name": "Alonso’s Cafe",
+      "lat": 41.3494045088655, 
+      "lng": 2.1075906306884766,
+      "description": "Bar Alonso",
+      "category": "restauración"
+    },
+    {
+      "id": 2,
+      "name": "100 Montaditos",
+      "lat": 41.359974, 
+      "lng": 2.101866,
+      "description": "Cervecerías La Sureña y 100 Montaditos",
+      "category": "restauración"
+    },
+    {
+      "id": 3,
+      "name": "La Farga",
+      "lat": 41.361951, 
+      "lng": 2.1044,
+      "description": "Centro Comercial La Farga",
+      "category": "restauración"
+    },
+    {
+      "id": 4,
+      "name": "Salting L'Hospitalet",
+      "lat": 41.356914, 
+      "lng": 2.112316,
+      "description": "Centro Comercial La Farga",
+      "category": "entreteniment"
+    },
+    {
+      "id": 5,
+      "name": "Ayuntamiento",
+      "lat": 41.359235, 
+      "lng": 2.099759,
+      "description": "Ajuntament de l'Hospitalet de Llobregat",
+      "category": "legislació"
+    }
+]
+  

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>Mapa</title>
+        <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    </head>
+    <body>
+        
+        <div id="map"></div>
+        
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+        
+    <script>
+
+        // Creamos un mapa con centro en una posición y el máximo zoom
+        var map = L.map('map').setView([41.350074, 2.107834], 21);
+        
+        // Cargamos el mapa con el zoom inicial
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 17,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+        
+        // Definimos iconos personalizados por categoría
+        var iconos = {
+            bar: L.icon({ iconUrl: 'img/bar.png', iconSize: [32, 32] }),
+            centro_comercial: L.icon({ iconUrl: 'img/ccc.png', iconSize: [32, 32] }),
+            ayuntamiento: L.icon({ iconUrl: 'img/ayunt.png', iconSize: [32, 32] }),
+            salting: L.icon({ iconUrl: 'img/salting.png', iconSize: [32, 32] }),
+            marcador: L.icon({ iconUrl: 'img/marcador.png', iconSize: [32, 32] })
+        };
+        
+        function obtenerLugares() {
+            
+            fetch('/api/places')
+            .then(response => {
+                if (!response.ok) throw new Error('API no disponible');
+                return response.json();
+            })
+            .catch(error => {
+                console.warn('Error con la API, cargando datos locales...', error);
+                return fetch('places.json').then(response => response.json());
+            })
+            .then(data => {
+                data.forEach(place => {
+                    
+                    // Usa el icono según la categoría o el genérico
+                    var icono = iconos[place.category] || iconos.marcador;
+                    
+                    var marcador = L.marker([place.lat, place.lng], {
+                        icon: icono,
+                        draggable: true
+                    }).addTo(map)
+                    .bindPopup(`<b>${place.name}</b><br>${place.description}`);
+
+                    // Evento para detectar cuando el marcador ha sido movido
+                    marcador.on('dragend', function(event) {
+                        var posicion = event.target.getLatLng();
+                        console.log(`Nueva posición de ${place.name}: ${posicion.lat}, ${posicion.lng}`);
+                        // Simular actualización en API
+                        fetch(`/api/update-place/${place.id}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ lat: posicion.lat, lng: posicion.lng })
+                        })
+                        .then(response => response.json())
+                        .then(data => console.log('Actualización en API simulada:', data))
+                        .catch(error => console.error('Error en la actualización:', error));
+                    });
+                    
+                });
+            })
+            .catch(error => {
+                console.error('Error cargando los datos locales:', error);
+                alert('No se pudieron cargar los lugares. Verifique la conexión.');
+            });
+        }
+
+        obtenerLugares();
+        
+        // Guardamos la ruta anterior a la última que hayamos seleccionado
+        var rutaAnterior;
+        
+        // Función para calcular la ruta desde la ubicación actual hasta donde le hayamos dado click
+        function calcularRuta(inicio, fin) {
+            
+            // Si ya existe una ruta anterior, la borramos
+            if (rutaAnterior) {
+                map.removeLayer(rutaAnterior);
+            }
+            
+            // Agregamos un marcador (pequeño círculo) a la ubicación actual
+            var marcadorInicio = L.circleMarker(inicio, {
+                color: 'green', 
+                radius: 8 
+            }).addTo(map);
+
+            // Agregamos un marcador (pequeño círculo) a la ubicación de destino
+            var marcadorFin = L.circleMarker(fin, {
+                color: 'red', 
+                radius: 8
+            }).addTo(map);
+
+            // Línea discontinua entre la ubicación actual y la ubicación de destino
+            rutaAnterior = L.polyline([inicio, fin], { 
+                color: 'blue', 
+                weight: 5, 
+                dashArray: '10, 10' 
+            }).addTo(map);
+        }
+
+        // Evento de clic en el mapa para calcular la ruta hacia el punto de destino
+        map.on('click', function(e) {
+            var ubicacionActual = [41.350074, 2.107834]; // Tu ubicación actual
+            var destino = e.latlng; // Latitud y longitud del lugar donde haces clic
+
+            // Llamar a la función para calcular la ruta
+            calcularRuta(ubicacionActual, destino);
+        });
+
+    </script>
+
+</body>
+</html>
