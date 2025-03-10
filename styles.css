@@ -1,7 +1,11 @@
-
 #map {
     height: 90vh;
-    transition: margin-right 0.3s ease-in-out;
+    transition: margin-right 0.3s ease-in-out, width 0.3s ease-in-out;
+}
+
+#map.margin-right {
+    margin-right: 300px;
+    width: calc(100% - 300px);
 }
 
 .leaflet-popup  .leaflet-zoom-animated {
